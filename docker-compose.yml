@@ -1,0 +1,7 @@
+version: '2'
+services:
+  mrctf:
+    build: .
+    restart: always
+    container_name: live-mrctf
+

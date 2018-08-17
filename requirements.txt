@@ -1,0 +1,7 @@
+unidecode
+slackclient
+prettytable
+requests
+python-dateutil
+pytz
+twitter
