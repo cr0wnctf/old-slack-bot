@@ -3,5 +3,7 @@ __all__ = [
     "syscalls_handler",
     "bot_handler",
     "admin_handler",
-    "wolfram_handler"
+    "wolfram_handler",
+    "ctftime_handler",
+    "tweet_handler"
 ]

@@ -37,7 +37,7 @@ class AddCTFCommand(Command):
             raise InvalidCommand("Add CTF failed: Invalid characters for CTF name found.")
 
         # Create the channel
-        response = slack_wrapper.create_channel(name)
+        response = slack_wrapper.create_channel(name, is_private=True)
 
         # Validate that the channel was successfully created.
         if response['ok'] == False:

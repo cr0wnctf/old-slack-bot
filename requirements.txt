@@ -3,3 +3,8 @@ slackclient
 wolframalpha
 dulwich
 pylint
+prettytable
+requests
+python-dateutil
+pytz
+twitter
