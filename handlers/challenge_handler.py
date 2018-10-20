@@ -463,9 +463,11 @@ class WorkonCommand(Command):
         if not challenge:
             raise InvalidCommand("This challenge does not exist.")
 
+        # Continue to allow people to join solved challenges, tq2 change
+
         # Don't allow joining already solved challenges (except after finish or for admins)
-        if challenge.is_solved and not ctf.finished and not user_is_admin:
-            raise InvalidCommand("This challenge is already solved.")
+        #if challenge.is_solved and not ctf.finished and not user_is_admin:
+        #    raise InvalidCommand("This challenge is already solved.")
 
         # Invite user to challenge channel
         slack_wrapper.invite_user(user_id, challenge.channel_id, is_private=True)
