@@ -43,7 +43,8 @@ class AddCTFCommand(Command):
         if response['ok'] == False:
             raise InvalidCommand("\"{}\" channel creation failed:\nError : {}".format(name, response['error']))
 
-        ctf_channel_id = response['channel']['id']
+        ctf_channel_id = response['group']['id']
+
 
         # New CTF object
         ctf = CTF(ctf_channel_id, name, long_name)
@@ -57,7 +58,7 @@ class AddCTFCommand(Command):
         ChallengeHandler.update_ctf_purpose(slack_wrapper, ctf)
 
         # Invite user
-        slack_wrapper.invite_user(user_id, ctf_channel_id)
+        slack_wrapper.invite_user(user_id, ctf_channel_id, is_private=True)
 
         # Invite everyone in the auto-invite list
         auto_invite_list = handler_factory.botserver.get_config_option("auto_invite")
@@ -67,7 +68,7 @@ class AddCTFCommand(Command):
                 slack_wrapper.invite_user(user_id, ctf_channel_id)
 
         # Notify people of new channel
-        message = "Created channel #{}".format(response['channel']['name']).strip()
+        message = "Created channel #{}".format(response['group']['name']).strip()
         slack_wrapper.post_message(channel_id, message)
 
 
@@ -666,6 +667,22 @@ class ArchiveCTFCommand(Command):
         # Show confirmation message
         slack_wrapper.post_message(channel_id, message)
 
+class JoinCTF(Command):
+
+    @classmethod
+    def execute(cls, slack_wrapper, args, channel_id, user_id, user_is_admin):
+        """Execute the Workon command."""
+        ctf_name = args[0] if args else None
+
+        # Validate that current channel is a CTF channel
+        ctf_channel = get_ctf_by_name(ChallengeHandler.DB, ctf_name)
+
+        if not ctf_channel:
+            raise InvalidCommand("This CTF does not exist.")
+
+        # Invite user to challenge channel
+        slack_wrapper.invite_user(user_id, ctf_channel.channel_id, is_private=True)
+
 
 class EndCTFCommand(Command):
     """
@@ -799,6 +816,7 @@ class ChallengeHandler(BaseHandler):
         self.commands = {
             "addctf": CommandDesc(AddCTFCommand, "Adds a new ctf", ["ctf_name", "long_name"], None),
             "addchallenge": CommandDesc(AddChallengeCommand, "Adds a new challenge for current ctf", ["challenge_name", "challenge_category"], None),
+            "joinctf": CommandDesc(JoinCTF, "Join a new ctf",    ["ctf_name"], None),
             "workon": CommandDesc(WorkonCommand, "Show that you're working on a challenge", None, ["challenge_name"]),
             "status": CommandDesc(StatusCommand, "Show the status for all ongoing ctf's", None, None),
             "solve": CommandDesc(SolveCommand, "Mark a challenge as solved", None, ["challenge_name", "support_member"]),
