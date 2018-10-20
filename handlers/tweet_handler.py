@@ -19,6 +19,7 @@ class UpcomingCommand(Command):
         profiles = ['SunTzuSec', '9000ipaddresses']
 
         # ...
+        handler_factory.botserver.get_config_option("twitter_api_key")
         api = Twitter(
             auth=OAuth('asds',
                        'asdsa', 'asdsa',
