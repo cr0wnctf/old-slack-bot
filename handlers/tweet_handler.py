@@ -2,6 +2,7 @@ from bottypes.command import *
 from bottypes.command_descriptor import *
 from bottypes.invalid_command import *
 from handlers.handler_factory import *
+import handlers.handler_factory as handler_factory
 from handlers.base_handler import *
 from dateutil import parser
 import time, urllib, json, requests, datetime
@@ -62,5 +63,4 @@ class TweetHandler(BaseHandler):
         }
 
 
-HandlerFactory.register("tweet_handler", TweetHandler())
-
+handler_factory.register("tweet_handler", TweetHandler())

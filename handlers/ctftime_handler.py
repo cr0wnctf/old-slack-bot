@@ -1,7 +1,7 @@
 from bottypes.command import *
 from bottypes.command_descriptor import *
 from bottypes.invalid_command import *
-from handlers.handler_factory import *
+import handlers.handler_factory as handler_factory
 from handlers.base_handler import *
 from dateutil import parser
 from decimal import *
@@ -22,6 +22,7 @@ class UpcomingCommand(Command):
         start_time = int(time.time()) - 86400 * 10
         end_time = int(time.time()) + (days * 86400)
         url = "https://ctftime.org/api/v1/events/?limit=20&start={}&finish={}".format(start_time, end_time)
+        print("URL = {}".format(url))
         with urllib.request.urlopen(url) as u:
             response = u.read()
         upcomingctfs = json.loads(response)
@@ -119,4 +120,4 @@ class CTFTimeHandler(BaseHandler):
         }
 
 
-HandlerFactory.register("ctftime", CTFTimeHandler())
+handler_factory.register("ctftime", CTFTimeHandler())

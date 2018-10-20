@@ -1,4 +1,5 @@
 *.pyc
+*.swp
 config.json
 config_solvetracker.json
 *.bin

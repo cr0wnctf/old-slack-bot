@@ -846,6 +846,10 @@ class ChallengeHandler(BaseHandler):
             purpose = load_json(channel['purpose']['value'])
 
             if not channel['is_archived'] and purpose and "ota_bot" in purpose and purpose["type"] == "CTF":
+                # Added to upgrade old channels to new ones
+                if 'long_name' not in purpose:
+                    purpose['long_name'] = 'Migration Purpose'
+
                 ctf = CTF(channel['id'], purpose['name'], purpose['long_name'])
 
                 ctf.cred_user = purpose.get("cred_user", "")

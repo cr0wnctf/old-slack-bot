@@ -1,4 +1,5 @@
 unidecode
+websocket
 slackclient
 wolframalpha
 dulwich
