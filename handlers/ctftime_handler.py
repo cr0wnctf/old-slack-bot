@@ -12,8 +12,9 @@ from prettytable import PrettyTable
 class UpcomingCommand(Command):
     """Shows the CTFs starting in the next 7 days."""
 
-    def execute(self, slack_wrapper, args, channel_id, user_id):
-        """Execute the ShowAvailableArch command."""
+    @classmethod
+    def execute(self, slack_wrapper, args, channel_id, user_id, user_is_admin):
+        """Find the upcoming CTFs and print them"""
         try:
             days = int(args[0])
         except Exception:
@@ -23,7 +24,8 @@ class UpcomingCommand(Command):
         end_time = int(time.time()) + (days * 86400)
         url = "https://ctftime.org/api/v1/events/?limit=20&start={}&finish={}".format(start_time, end_time)
         print("URL = {}".format(url))
-        with urllib.request.urlopen(url) as u:
+        req = urllib.request.Request(url, headers={'User-Agent' : "Fairy and Pixie dust"}) 
+        with urllib.request.urlopen(req) as u:
             response = u.read()
         upcomingctfs = json.loads(response)
         bst = pytz.timezone('Europe/London')
@@ -34,8 +36,6 @@ class UpcomingCommand(Command):
         msg += "*Upcoming CTFs* \n\n"
 
         for ctf in upcomingctfs:
-
-
             start = parser.parse(ctf['start'])
 
             local_dt = start.astimezone(bst)
@@ -62,14 +62,16 @@ class UpcomingCommand(Command):
 class HowLongCommand(Command):
     """Shows information about the requested syscall."""
 
-    def execute(self, slack_wrapper, args, channel_id, user_id):
+    @classmethod
+    def execute(self, slack_wrapper, args, channel_id, user_id, user_is_admin):
             self.send_message(slack_wrapper, channel_id, user_id,
                              "Specified architecture not available: `{}`".format(args[0]))
 
 
 class CTFTimeScoreCalc(Command):
 
-    def execute(self, slack_wrapper, args, channel_id, user_id):
+    @classmethod
+    def execute(self, slack_wrapper, args, channel_id, user_id, user_is_admin):
         if len(args) < 5:
             slack_wrapper.post_message(channel_id, "Please supply all args")
         else:
@@ -113,7 +115,6 @@ class CTFTimeHandler(BaseHandler):
     MSGMODE = 0
 
     def __init__(self):
-
         self.commands = {
             "upcoming": CommandDesc(UpcomingCommand, "Shows the upcoming CTFs in the next 7 days", None, None),
             "score": CommandDesc(CTFTimeScoreCalc, "Calculate CTFTime points from a CTF", ["Our Score", "Our Placing", "Best Score", "Number of teams", "Weight"], None),

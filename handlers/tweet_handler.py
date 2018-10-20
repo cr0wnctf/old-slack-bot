@@ -14,17 +14,22 @@ import random
 class UpcomingCommand(Command):
     """Shows the CTFs starting in the next 7 days."""
 
-    def execute(self, slack_wrapper, args, channel_id, user_id):
+    @classmethod
+    def execute(cls, slack_wrapper, args, channel_id, user_id, user_is_admin):
         """Execute the ShowAvailableArch command."""
 
         profiles = ['SunTzuSec', '9000ipaddresses']
 
         # ...
-        handler_factory.botserver.get_config_option("twitter_api_key")
+        access_token = handler_factory.botserver.get_config_option("twitter_access_token")
+        access_secret = handler_factory.botserver.get_config_option("twitter_access_secret")
+        consumer_secret = handler_factory.botserver.get_config_option("twitter_consumer_secret")
+        consumer_key = handler_factory.botserver.get_config_option("twitter_consumer_key")
+
+
         api = Twitter(
-            auth=OAuth('asds',
-                       'asdsa', 'asdsa',
-                       'asdas'))
+                auth=OAuth(access_token,access_secret, consumer_key, consumer_secret)
+            )
 
         # print(api.VerifyCredentials())
         tweet_set = []
