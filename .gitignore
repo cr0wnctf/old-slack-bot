@@ -6,3 +6,5 @@ config_solvetracker.json
 *.log
 .venv
 intro_msg
+venv
+.idea
