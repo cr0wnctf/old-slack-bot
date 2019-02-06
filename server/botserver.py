@@ -5,10 +5,13 @@ import websocket
 from slackclient.server import SlackConnectionError
 
 import handlers.handler_factory as handler_factory
-from handlers import *
+
 from bottypes.invalid_console_command import *
 from util.slack_wrapper import *
 from util.loghandler import log
+
+# This pointless line is quite important. This registers all the handlers so no delete plox
+from handlers import *
 
 
 class BotServer(threading.Thread):

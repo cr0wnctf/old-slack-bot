@@ -6,4 +6,4 @@ services:
     container_name: live-mrctf
     volumes:
       - ./databases/challenge_handler.bin:/src/databases/challenge_handler.bin
-
+      - ./old-pos.txt:/src/old-pos.txt # Used in rank_service

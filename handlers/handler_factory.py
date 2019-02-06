@@ -7,6 +7,7 @@ resolve it and execute it
 """
 import shlex
 from unidecode import unidecode
+
 from util.loghandler import *
 from bottypes.invalid_command import *
 
