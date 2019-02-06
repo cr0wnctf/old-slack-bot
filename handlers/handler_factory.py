@@ -10,7 +10,6 @@ from unidecode import unidecode
 from util.loghandler import *
 from bottypes.invalid_command import *
 
-
 handlers = {}
 botserver = None
 
@@ -22,9 +21,9 @@ def register(handler_name, handler):
     handler.handler_name = handler_name
 
 
-def initialize(slack_wrapper, bot_id, _botserver):
+def initialize(slack_wrapper, _botserver):
     """
-    Initializes all handler with common information.
+    Initializes all handlers with common information.
 
     Might remove bot_id from here later on?
     """
@@ -34,7 +33,7 @@ def initialize(slack_wrapper, bot_id, _botserver):
         handlers[handler].init(slack_wrapper)
 
 
-def process(slack_wrapper, botserver, message, channel_id, user_id):
+def process(slack_wrapper, message, channel_id, user_id):
     log.debug("Processing message: {} from {} ({})".format(message, channel_id, user_id))
 
     try:  # Parse command and check for malformed input
@@ -57,15 +56,12 @@ def process_reaction(slack_wrapper, reaction, timestamp, channel_id, user_id):
     try:
         log.debug("Processing reaction: {} from {} ({})".format(reaction, channel_id, timestamp))
 
-        processed = False
-
         admin_users = botserver.get_config_option("admin_users")
         user_is_admin = admin_users and user_id in admin_users
 
         for handler_name, handler in handlers.items():
             if handler.can_handle_reaction(reaction):
                 handler.process_reaction(slack_wrapper, reaction, channel_id, timestamp, user_id, user_is_admin)
-                processed = True
     except InvalidCommand as e:
         slack_wrapper.post_message(channel_id, e.message)
 

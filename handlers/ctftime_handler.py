@@ -1,33 +1,39 @@
-from bottypes.command import *
-from bottypes.command_descriptor import *
-from bottypes.invalid_command import *
-import handlers.handler_factory as handler_factory
-from handlers.base_handler import *
-from dateutil import parser
-from decimal import *
-import time, urllib, json, requests, datetime
+import datetime
+import json
+import time
+
 import pytz
-from prettytable import PrettyTable
+import requests
+from dateutil import parser
+
+import handlers.handler_factory as handler_factory
+from bottypes.command_descriptor import *
+from handlers.base_handler import *
+
 
 class UpcomingCommand(Command):
     """Shows the CTFs starting in the next 7 days."""
 
     @classmethod
-    def execute(self, slack_wrapper, args, channel_id, user_id, user_is_admin):
+    def execute(cls, slack_wrapper, args, channel_id, user_id, user_is_admin):
         """Find the upcoming CTFs and print them"""
         try:
             days = int(args[0])
-        except Exception:
+        except:
             days = 7
 
         start_time = int(time.time()) - 86400 * 10
         end_time = int(time.time()) + (days * 86400)
         url = "https://ctftime.org/api/v1/events/?limit=20&start={}&finish={}".format(start_time, end_time)
         print("URL = {}".format(url))
-        req = urllib.request.Request(url, headers={'User-Agent' : "Fairy and Pixie dust"}) 
-        with urllib.request.urlopen(req) as u:
-            response = u.read()
-        upcomingctfs = json.loads(response)
+        req = requests.get(url, headers={'User-Agent': "Otters inc."})
+
+        if req.status_code != 200:
+            msg = "Unable to get upcoming events :("
+            slack_wrapper.post_message(channel_id, msg)
+            return
+
+        upcoming_ctfs = json.loads(req.text)
         bst = pytz.timezone('Europe/London')
         now = datetime.datetime.now(tz=bst)
 
@@ -35,7 +41,7 @@ class UpcomingCommand(Command):
 
         msg += "*Upcoming CTFs* \n\n"
 
-        for ctf in upcomingctfs:
+        for ctf in upcoming_ctfs:
             start = parser.parse(ctf['start'])
 
             local_dt = start.astimezone(bst)
@@ -59,19 +65,11 @@ class UpcomingCommand(Command):
 
         slack_wrapper.post_message(channel_id, msg)
 
-class HowLongCommand(Command):
-    """Shows information about the requested syscall."""
-
-    @classmethod
-    def execute(self, slack_wrapper, args, channel_id, user_id, user_is_admin):
-            self.send_message(slack_wrapper, channel_id, user_id,
-                             "Specified architecture not available: `{}`".format(args[0]))
-
 
 class CTFTimeScoreCalc(Command):
 
     @classmethod
-    def execute(self, slack_wrapper, args, channel_id, user_id, user_is_admin):
+    def execute(cls, slack_wrapper, args, channel_id, user_id, user_is_admin):
         if len(args) < 5:
             slack_wrapper.post_message(channel_id, "Please supply all args")
         else:
@@ -86,14 +84,13 @@ class CTFTimeScoreCalc(Command):
 
             total = ((points_coef + place_coef) * weight) / (1 / (1 + (place / num_teams)))
 
-
             message = str("Total CTFTime points: {:.5}".format(total))
-
             slack_wrapper.post_message(channel_id, message)
 
 
 class CTFTimePosition(Command):
-    def execute(self, slack_wrapper, args, channel_id, user_id):
+    @classmethod
+    def execute(cls, slack_wrapper, args, channel_id, user_id, user_is_admin):
         pass
 
 
@@ -117,7 +114,8 @@ class CTFTimeHandler(BaseHandler):
     def __init__(self):
         self.commands = {
             "upcoming": CommandDesc(UpcomingCommand, "Shows the upcoming CTFs in the next 7 days", None, None),
-            "score": CommandDesc(CTFTimeScoreCalc, "Calculate CTFTime points from a CTF", ["Our Score", "Our Placing", "Best Score", "Number of teams", "Weight"], None),
+            "score": CommandDesc(CTFTimeScoreCalc, "Calculate CTFTime points from a CTF",
+                                 ["Our Score", "Our Placing", "Best Score", "Number of teams", "Weight"], None),
         }
 
 

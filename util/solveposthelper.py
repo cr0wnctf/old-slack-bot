@@ -6,9 +6,6 @@ from util.ctf_template_resolver import resolve_ctf_template, resolve_stats_templ
 from util.loghandler import log
 from bottypes.invalid_command import InvalidCommand
 
-ST_GIT_CONFIG = {}
-ST_GIT_SUPPORT = False
-
 
 def post_ctf_data(ctf, title):
     """Create a post and a statistic file and upload it to the configured SolveTracker repository."""

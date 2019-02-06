@@ -1,7 +1,6 @@
 import json
 import pickle
 
-from util.loghandler import *
 from bottypes.invalid_command import *
 
 #######

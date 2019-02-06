@@ -1,11 +1,3 @@
-import shlex
-import pickle
-import re
-import json
-
-from unidecode import unidecode
-
-from bottypes.command import *
 from bottypes.command_descriptor import *
 import handlers.handler_factory as handler_factory
 from handlers.base_handler import *
@@ -61,7 +53,8 @@ class BotHandler(BaseHandler):
         self.commands = {
             "ping": CommandDesc(PingCommand, "Ping the bot", None, None),
             "intro": CommandDesc(IntroCommand, "Show an introduction message for new members", None, None),
-            "version": CommandDesc(VersionCommand, "Show git information about the running version of the bot", None, None)
+            "version": CommandDesc(VersionCommand, "Show git information about the running version of the bot", None,
+                                   None)
         }
 
 

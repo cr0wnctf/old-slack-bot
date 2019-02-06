@@ -1,9 +1,7 @@
-from bottypes.command import *
-from bottypes.command_descriptor import *
-from bottypes.invalid_command import *
 import handlers.handler_factory as handler_factory
-from handlers.base_handler import *
 from addons.syscalls.syscallinfo import *
+from bottypes.command_descriptor import *
+from handlers.base_handler import *
 
 
 class ShowAvailableArchCommand(Command):
@@ -12,12 +10,12 @@ class ShowAvailableArchCommand(Command):
     @classmethod
     def execute(cls, slack_wrapper, args, channel_id, user_id, user_is_admin):
         """Execute the ShowAvailableArch command."""
-        archList = SyscallsHandler.syscallInfo.getAvailableArchitectures()
+        arch_list = SyscallsHandler.syscallInfo.get_available_archs()
 
         msg = "\n"
         msg += "Available architectures:```"
 
-        for arch in archList:
+        for arch in arch_list:
             msg += "{}\t".format(arch)
 
         msg = msg.strip() + "```"
@@ -41,18 +39,16 @@ class ShowSyscallCommand(Command):
     @classmethod
     def execute(cls, slack_wrapper, args, channel_id, user_id, user_is_admin):
         """Execute the ShowSyscall command."""
-        archObj = SyscallsHandler.syscallInfo.getArch(args[0].lower())
+        arch_obj = SyscallsHandler.syscallInfo.get_arch(args[0].lower())
 
-        if archObj:
-            entry = None
-
+        if arch_obj:
             # convenience : Try to search syscall by id or by name, depending on what
             # the user has specified
             try:
-                syscallID = int(args[1])
-                entry = archObj.getEntryByID(syscallID)
+                syscall_id = int(args[1])
+                entry = arch_obj.getEntryByID(syscall_id)
             except:
-                entry = archObj.getEntryByName(args[1].lower())
+                entry = arch_obj.get_entry_by_name(args[1].lower())
 
             if entry:
                 slack_wrapper.post_message(channel_id, cls.parse_syscall_info(entry))
@@ -86,7 +82,8 @@ class SyscallsHandler(BaseHandler):
 
         self.commands = {
             "available": CommandDesc(ShowAvailableArchCommand, "Shows the available syscall architectures", None, None),
-            "show": CommandDesc(ShowSyscallCommand, "Show information for a specific syscall", ["arch", "syscall name/syscall id"], None),
+            "show": CommandDesc(ShowSyscallCommand, "Show information for a specific syscall",
+                                ["arch", "syscall name/syscall id"], None),
         }
 
 

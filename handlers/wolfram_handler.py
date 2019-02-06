@@ -1,14 +1,8 @@
-import re
-
 import wolframalpha
 
-from bottypes.command import *
-from bottypes.command_descriptor import *
-from bottypes.invalid_command import *
 import handlers.handler_factory as handler_factory
+from bottypes.command_descriptor import *
 from handlers.base_handler import *
-from addons.syscalls.syscallinfo import *
-from util.util import *
 
 
 class AskCommand(Command):
@@ -40,7 +34,7 @@ class AskCommand(Command):
                                 answer += "```\n"
                                 answer += subpod.plaintext[:512] + "\n"
                                 answer += "```\n"
-                                if (len(subpod.plaintext) > 512):
+                                if len(subpod.plaintext) > 512:
                                     answer += "*shortened*"
                 else:
                     answer = next(res.results, None)
@@ -73,8 +67,8 @@ class WolframHandler(BaseHandler):
 
     def __init__(self):
         self.commands = {
-            "ask": CommandDesc(AskCommand, "Ask wolfram alpha a question (add -v for verbose answer)", ["question"], None, False),
-        }
+            "ask": CommandDesc(AskCommand, "Ask wolfram alpha a question (add -v for verbose answer)", ["question"],
+                               None, False)}
 
 
 handler_factory.register("wolfram", WolframHandler())

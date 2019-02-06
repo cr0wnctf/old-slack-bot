@@ -23,7 +23,6 @@ class SyscallTable:
         return entry
 
     def parse_table(self, filename):
-        lines = []
 
         with open(filename) as f:
             lines = f.readlines()
@@ -43,13 +42,13 @@ class SyscallTable:
 
         return None
 
-    def getEntryByName(self, name):
+    def get_entry_by_name(self, name):
         if name in self.entries:
             return self.entries[name]
 
         return None
 
-    def getInfoMessage(self, entry):
+    def get_info_message(self, entry):
         if entry:
             msg = ""
 
@@ -60,13 +59,13 @@ class SyscallTable:
 
         return None
 
-    def getInfoMessageByID(self, idx):
+    def get_info_message_by_id(self, idx):
         entry = self.getEntryByID(idx)
-        return self.getInfoMessage(entry)
+        return self.get_info_message(entry)
 
-    def getInfoMessageByName(self, name):
-        entry = self.getEntryByName(name)
-        return self.getInfoMessage(entry)
+    def get_info_message_by_name(self, name):
+        entry = self.get_entry_by_name(name)
+        return self.get_info_message(entry)
 
 
 class SyscallInfo:
@@ -79,10 +78,10 @@ class SyscallInfo:
 
             self.tables[table] = SyscallTable(filename)
 
-    def getAvailableArchitectures(self):
+    def get_available_archs(self):
         return self.tables.keys()
 
-    def getArch(self, arch):
+    def get_arch(self, arch):
         if arch in self.tables:
             return self.tables[arch]
 

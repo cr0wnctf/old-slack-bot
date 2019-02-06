@@ -1,5 +1,3 @@
-from abc import ABC, abstractmethod
-
 from bottypes.command import *
 from bottypes.invalid_command import *
 

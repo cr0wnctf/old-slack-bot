@@ -1,9 +1,7 @@
-import json
 import threading
-import time
-from util.loghandler import *
-from util.util import *
+
 from bottypes.invalid_console_command import *
+from util.loghandler import log
 
 # This should also be refactored to a "ConsoleHandler" and work with Commands like the BotHandlers.
 # Would make a much cleaner design, than using if/else
@@ -13,6 +11,7 @@ class ConsoleThread(threading.Thread):
 
     def __init__(self, botserver):
         self.botserver = botserver
+        self.running = False
         threading.Thread.__init__(self)
 
     def update_config(self, option, value):

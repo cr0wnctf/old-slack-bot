@@ -36,18 +36,14 @@ def resolve_ctf_template(ctf, title, template_file, solves_template_file):
 
 def resolve_stats_template(ctf):
     """Resolves the statistic json with the data from the specified ctf data."""
-    stats = {}
-
-    stats["ctfname"] = ctf.name
-    stats["challenges"] = []
+    stats = {"ctfname": ctf.name, "challenges": []}
 
     for challenge_obj in filter(lambda c: c.is_solved, ctf.challenges):
-        challenge = {}
-
-        challenge["name"] = challenge_obj.name
-        challenge["solver"] = challenge_obj.solver
-        challenge["solve_date"] = challenge_obj.solve_date
-        challenge["category"] = challenge_obj.category
+        challenge = {"name": challenge_obj.name,
+                     "solver": challenge_obj.solver,
+                     "solve_date": challenge_obj.solve_date,
+                     "category": challenge_obj.category
+                     }
 
         stats["challenges"].append(challenge)
 

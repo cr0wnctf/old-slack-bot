@@ -1,15 +1,11 @@
-from bottypes.command import *
-from bottypes.command_descriptor import *
-from bottypes.invalid_command import *
-from handlers.handler_factory import *
-import handlers.handler_factory as handler_factory
-from handlers.base_handler import *
-from dateutil import parser
-import time, urllib, json, requests, datetime
-import pytz
-from prettytable import PrettyTable
-from twitter import Twitter, OAuth
 import random
+
+from twitter import Twitter, OAuth
+
+import handlers.handler_factory as handler_factory
+from bottypes.command_descriptor import *
+from handlers.base_handler import *
+
 
 class UpcomingCommand(Command):
     """Shows the CTFs starting in the next 7 days."""
@@ -26,12 +22,10 @@ class UpcomingCommand(Command):
         consumer_secret = handler_factory.botserver.get_config_option("twitter_consumer_secret")
         consumer_key = handler_factory.botserver.get_config_option("twitter_consumer_key")
 
-
         api = Twitter(
-                auth=OAuth(access_token,access_secret, consumer_key, consumer_secret)
-            )
+            auth=OAuth(access_token, access_secret, consumer_key, consumer_secret)
+        )
 
-        # print(api.VerifyCredentials())
         tweet_set = []
 
         for ting in profiles:
@@ -41,7 +35,6 @@ class UpcomingCommand(Command):
         msg = random.choice(tweet_set)
 
         slack_wrapper.post_message(channel_id, msg)
-
 
 
 class TweetHandler(BaseHandler):
@@ -62,7 +55,6 @@ class TweetHandler(BaseHandler):
     MSGMODE = 0
 
     def __init__(self):
-
         self.commands = {
             "quote": CommandDesc(UpcomingCommand, "Get an inspirational quote", None, None),
         }

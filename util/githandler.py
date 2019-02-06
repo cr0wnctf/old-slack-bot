@@ -1,16 +1,16 @@
 """GitHandler module - Provides GitHandler with shortcuts for handling git repository access."""
 import os
-import dulwich
 import re
 
 from io import StringIO
 
 from dulwich import porcelain
+import dulwich.errors
 from util.loghandler import log
 from bottypes.invalid_command import InvalidCommand
 
 
-class GitHandler():
+class GitHandler:
     """Handles commit for multiple files."""
 
     def __init__(self, repo_path):
@@ -78,7 +78,7 @@ class GitHandler():
         commit_match = re.search('Date: (.+?)\n\n', commit_msg)
         commit_date = commit_match.group(1).strip() if commit_match else ""
 
-        commit_match = re.search("\n\n(.+?)\Z", commit_msg, flags=re.DOTALL)
+        commit_match = re.search("\n\n(.+?)\\Z", commit_msg, flags=re.DOTALL)
         commit_info = commit_match.group(1).strip() if commit_match else ""
 
         return "I'm running commit `{}` of branch `{}`\n\n*{}*```{}```".format(commit, current_branch, commit_date, commit_info)
