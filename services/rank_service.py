@@ -4,8 +4,6 @@ import datetime
 import requests
 from slackclient import SlackClient
 from bs4 import BeautifulSoup
-
-from server.botserver import BotServer
 from services.base_service import BaseService
 from util.loghandler import log
 import time
@@ -20,18 +18,32 @@ class RankService(BaseService):
     def run_time_period(self):
         return 60 * 60  # Hourly
 
-    def __init__(self, botserver: BotServer):
+    def __init__(self, botserver):
         self.lookup_add = ""
         self.add_id = 1
 
         self.team_name = u"the cr0wn"
-        self.post_channel_id = "C92MFVBMY"
         self.slack_token = botserver.get_config_option("api_key")
         self.position_filename = "old-pos.txt"
+        self.post_channel_id = self.find_channel_id("general")
 
-    def run(self, botserver: BotServer):
+        super().__init__(botserver, self.run)
+
+    def find_channel_id(self, channel_name):
+        sc = SlackClient(self.slack_token)
+        x = sc.api_call(
+            "channels.list",
+        )
+
+        channels = x["channels"]
+        for channel in channels:
+            if channel["name"] == channel_name:
+                return channel["id"]
+        raise ValueError("Channel not found!")
+
+    def run(self):
         quote_page = 'https://ctftime.org/stats/{}'.format(self.lookup_add)
-        page = requests.get(quote_page)
+        page = requests.get(quote_page, headers={'User-Agent': "Otters inc."})
         soup = BeautifulSoup(page.text, 'html.parser')
 
         data = []
@@ -43,9 +55,9 @@ class RankService(BaseService):
             cols = [ele.text.strip() for ele in cols]
             data.append([ele for ele in cols if ele])
 
-        old_position = 0
+        old_position = -1
         if os.path.isfile(self.position_filename):
-            with open('old-pos.', 'r') as f:
+            with open(self.position_filename, 'r') as f:
                 old_position = int(f.read().replace('\n', ''))
 
         position_changed = False

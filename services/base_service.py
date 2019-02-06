@@ -1,5 +1,5 @@
+import threading
 from abc import ABC, abstractmethod
-from server.botserver import BotServer
 
 
 class BaseService(ABC):
@@ -7,14 +7,19 @@ class BaseService(ABC):
     Abstract class that every service should inherit from
     """
 
+    def __init__(self, bot_server, run):
+        self.bot_server = bot_server
+        self.running_thread = None
+        self.child_run = run
+
     @abstractmethod
-    def run(self, bot_server: BotServer):
+    def run(self):
         """
         Method called periodically by service handler
         :param bot_server: Reference to the running bot_server
         :return: None
         """
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def run_time_period(self):
@@ -24,4 +29,11 @@ class BaseService(ABC):
         Give values in seconds.
         :return:
         """
-        pass
+        raise NotImplementedError
+
+    def start(self):
+        self.run()
+        self.running_thread = threading.Timer(self.run_time_period(), self.child_run).start()
+
+    def cancel(self):
+        self.running_thread.cancel()
