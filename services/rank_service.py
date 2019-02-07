@@ -6,6 +6,7 @@ from slackclient import SlackClient
 from bs4 import BeautifulSoup
 from services.base_service import BaseService
 from util.loghandler import log
+from util.slack_wrapper import SlackWrapper
 import time
 import os
 
@@ -18,7 +19,7 @@ class RankService(BaseService):
     def run_time_period(self):
         return 60 * 60  # Hourly
 
-    def __init__(self, botserver):
+    def __init__(self, botserver, slack_wrapper: SlackWrapper):
         self.lookup_add = ""
         self.add_id = 1
 
@@ -27,7 +28,7 @@ class RankService(BaseService):
         self.position_filename = "old-pos.txt"
         self.post_channel_id = self.find_channel_id("general")
 
-        super().__init__(botserver, self.run)
+        super().__init__(botserver, slack_wrapper, self.run)
 
     def find_channel_id(self, channel_name):
         sc = SlackClient(self.slack_token)
@@ -64,13 +65,11 @@ class RankService(BaseService):
 
         position_found = -1
         points_found = -1
-        events_found = -1
 
         for l in data:
             if len(l) > 1 and l[1] == self.team_name:
                 position_found = int(l[0])
                 points_found = float(l[2])
-                events_found = int(l[3])
 
         if position_found is None:
             self.add_id += 1
@@ -90,15 +89,8 @@ class RankService(BaseService):
 
         message = u"*------- 🚨 CTFTIME ALERT 🚨 -------*\n\n@channel\n" \
                   "*We moved from position {} to {} in the world! 🌍🌍🌍🌍🌍" \
-                  "*\n\n*We have {} points in {} events.*\n\n" \
-                  "https://ctftime.org/stats/".format(old_position, position_found, points_found, events_found)
+                  "*\n\n*We have {} points*\n\n" \
+                  "https://ctftime.org/stats/".format(old_position, position_found, points_found)
 
-        sc = SlackClient(self.slack_token)
-
-        sc.api_call(
-            "chat.postMessage",
-            channel=self.post_channel_id,
-            text=message
-        )
-
+        self.slack_wrapper.post_message(self.post_channel_id, message)
         log.info("{} : sent update".format(ts))

@@ -124,8 +124,8 @@ class BotServer(threading.Thread):
     def start_services(self):
         for service in enabled_services:
             log.info("[Services] Enabling {}".format(service.__name__))
-            s = service(self)
-            self.service_stack.append(service(self))
+            s = service(self, self.slack_wrapper)
+            self.service_stack.append(s)
             s.start()
 
     def stop_services(self):
@@ -137,13 +137,11 @@ class BotServer(threading.Thread):
 
         self.running = True
         self.load_config()
+        self.slack_wrapper = SlackWrapper(self.get_config_option("api_key"))
         self.start_services()
 
         while self.running:
             try:
-
-                self.slack_wrapper = SlackWrapper(self.get_config_option("api_key"))
-
                 if self.slack_wrapper.connected:
                     log.info("Connection successful...")
                     self.load_bot_data()
