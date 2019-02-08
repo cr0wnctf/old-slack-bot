@@ -51,6 +51,7 @@ class RankService(BaseService):
 
         while position_found is None and self.add_id < 100:
             quote_page = 'https://ctftime.org/stats/{}'.format(self.lookup_add)
+            # This useragent needs to be ranoish otherwise we get 403'd
             page = requests.get(quote_page, headers={'User-Agent': "Otters inc."})
             soup = BeautifulSoup(page.text, 'html.parser')
 
@@ -94,7 +95,7 @@ class RankService(BaseService):
         message = u"*------- 🚨 CTFTIME ALERT 🚨 -------*\n\n@channel\n" \
                   "*We moved from position {} to {} in the world! 🌍🌍🌍🌍🌍" \
                   "*\n\n*We have {} points*\n\n" \
-                  "https://ctftime.org/stats/".format(old_position, position_found, points_found)
+                  "https://ctftime.org/stats/{}".format(old_position, position_found, points_found, self.lookup_add)
 
         self.slack_wrapper.post_message(self.post_channel_id, message)
         log.info("{} : sent update".format(ts))
