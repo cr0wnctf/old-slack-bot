@@ -28,7 +28,7 @@ class RankService(BaseService):
         self.position_filename = "old-pos.txt"
         self.post_channel_id = self.find_channel_id("general")
 
-        super().__init__(botserver, slack_wrapper, self.run)
+        super().__init__(botserver, slack_wrapper)
 
     def find_channel_id(self, channel_name):
         sc = SlackClient(self.slack_token)
@@ -43,37 +43,41 @@ class RankService(BaseService):
         raise ValueError("Channel not found!")
 
     def run(self):
-        quote_page = 'https://ctftime.org/stats/{}'.format(self.lookup_add)
-        page = requests.get(quote_page, headers={'User-Agent': "Otters inc."})
-        soup = BeautifulSoup(page.text, 'html.parser')
-
-        data = []
-        table = soup.find('table', attrs={'class': 'table table-striped'})
-
-        rows = table.find_all('tr')
-        for row in rows:
-            cols = row.find_all('td')
-            cols = [ele.text.strip() for ele in cols]
-            data.append([ele for ele in cols if ele])
-
+        position_found = None
         old_position = -1
-        if os.path.isfile(self.position_filename):
-            with open(self.position_filename, 'r') as f:
-                old_position = int(f.read().replace('\n', ''))
 
         position_changed = False
-
-        position_found = -1
         points_found = -1
 
-        for l in data:
-            if len(l) > 1 and l[1] == self.team_name:
-                position_found = int(l[0])
-                points_found = float(l[2])
+        while position_found is None and self.add_id < 100:
+            quote_page = 'https://ctftime.org/stats/{}'.format(self.lookup_add)
+            page = requests.get(quote_page, headers={'User-Agent': "Otters inc."})
+            soup = BeautifulSoup(page.text, 'html.parser')
+
+            data = []
+            table = soup.find('table', attrs={'class': 'table table-striped'})
+
+            rows = table.find_all('tr')
+            for row in rows:
+                cols = row.find_all('td')
+                cols = [ele.text.strip() for ele in cols]
+                data.append([ele for ele in cols if ele])
+
+            if os.path.isfile(self.position_filename):
+                with open(self.position_filename, 'r') as f:
+                    old_position = int(f.read().replace('\n', ''))
+
+            for l in data:
+                if len(l) > 1 and l[1] == self.team_name:
+                    position_found = int(l[0])
+                    points_found = float(l[2])
+
+            self.add_id += 1
+            self.lookup_add = "2019?page={}".format(self.add_id)
 
         if position_found is None:
-            self.add_id += 1
-            self.lookup_add = "2018?page={}".format(self.add_id)
+            log.error("Cannot find position in first 100 pages!")
+            return
 
         if old_position != position_found:
             position_changed = True

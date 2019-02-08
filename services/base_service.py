@@ -8,11 +8,10 @@ class BaseService(ABC):
     Abstract class that every service should inherit from
     """
 
-    def __init__(self, bot_server, slack_wrapper: SlackWrapper, run):
+    def __init__(self, bot_server, slack_wrapper: SlackWrapper):
         self.bot_server = bot_server
         self.slack_wrapper = slack_wrapper
         self.running_thread = None
-        self.child_run = run
 
     @abstractmethod
     def run(self):
@@ -35,7 +34,7 @@ class BaseService(ABC):
 
     def start(self):
         self.run()
-        self.running_thread = threading.Timer(self.run_time_period(), self.child_run).start()
+        self.running_thread = threading.Timer(self.run_time_period(), self.start).start()
 
     def cancel(self):
         self.running_thread.cancel()
