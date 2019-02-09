@@ -51,7 +51,7 @@ class RankService(BaseService):
 
         while position_found is None and self.add_id < 100:
             quote_page = 'https://ctftime.org/stats/{}'.format(self.lookup_add)
-            # This useragent needs to be ranoish otherwise we get 403'd
+            # This useragent needs to be randomish otherwise we get 403'd
             page = requests.get(quote_page, headers={'User-Agent': "Otters inc."})
             soup = BeautifulSoup(page.text, 'html.parser')
 
