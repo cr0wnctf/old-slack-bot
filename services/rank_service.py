@@ -20,9 +20,6 @@ class RankService(BaseService):
         return 60 * 60  # Hourly
 
     def __init__(self, botserver, slack_wrapper: SlackWrapper):
-        self.lookup_add = ""
-        self.add_id = 1
-
         self.team_name = u"the cr0wn"
         self.slack_token = botserver.get_config_option("api_key")
         self.position_filename = "old-pos.txt"
@@ -48,9 +45,11 @@ class RankService(BaseService):
 
         position_changed = False
         points_found = -1
+        add_id = 0
+        lookup_add = ""
 
-        while position_found is None and self.add_id < 100:
-            quote_page = 'https://ctftime.org/stats/{}'.format(self.lookup_add)
+        while position_found is None and add_id < 100:
+            quote_page = 'https://ctftime.org/stats/{}'.format(lookup_add)
             # This useragent needs to be randomish otherwise we get 403'd
             page = requests.get(quote_page, headers={'User-Agent': "Otters inc."})
             soup = BeautifulSoup(page.text, 'html.parser')
@@ -73,9 +72,11 @@ class RankService(BaseService):
                     position_found = int(l[0])
                     points_found = float(l[2])
 
-            self.add_id += 1
-            self.lookup_add = "2019?page={}".format(self.add_id)
+            if position_found is not None:
+                break
 
+            add_id += 1
+            lookup_add = "2019?page={}".format(add_id)
         if position_found is None:
             log.error("Cannot find position in first 100 pages!")
             return
@@ -95,7 +96,7 @@ class RankService(BaseService):
         message = u"*------- 🚨 CTFTIME ALERT 🚨 -------*\n\n@channel\n" \
                   "*We moved from position {} to {} in the world! 🌍🌍🌍🌍🌍" \
                   "*\n\n*We have {} points*\n\n" \
-                  "https://ctftime.org/stats/{}".format(old_position, position_found, points_found, self.lookup_add)
+                  "https://ctftime.org/stats/{}".format(old_position, position_found, points_found, lookup_add)
 
         self.slack_wrapper.post_message(self.post_channel_id, message)
         log.info("{} : sent update".format(ts))
