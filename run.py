@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from server.botserver import *
+from server.botserver import BotServer
 from util.loghandler import log
 
 

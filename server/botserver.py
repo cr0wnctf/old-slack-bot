@@ -5,10 +5,14 @@ import websocket
 from slackclient.server import SlackConnectionError
 
 import handlers.handler_factory as handler_factory
-from handlers import *
+
 from bottypes.invalid_console_command import *
 from util.slack_wrapper import *
 from util.loghandler import log
+from services.enabled_services import enabled_services
+
+# This pointless line is quite important. This registers all the handlers so no delete plox until a rewrite
+from handlers import *
 
 
 class BotServer(threading.Thread):
@@ -26,12 +30,15 @@ class BotServer(threading.Thread):
         self.bot_id = ""
         self.bot_at = ""
         self.slack_wrapper = None
+        self.service_stack = []
 
-    def lock(self):
+    @staticmethod
+    def lock():
         """Acquire global lock for working with global (not thread-safe) data."""
         BotServer.thread_lock.acquire()
 
-    def release(self):
+    @staticmethod
+    def release():
         """Release global lock after accessing global (not thread-safe) data."""
         BotServer.thread_lock.release()
 
@@ -114,16 +121,27 @@ class BotServer(threading.Thread):
         log.debug("Found bot user {} ({})".format(self.bot_name, self.bot_id))
         self.running = True
 
+    def start_services(self):
+        for service in enabled_services:
+            log.info("[Services] Enabling {}".format(service.__name__))
+            s = service(self, self.slack_wrapper)
+            self.service_stack.append(s)
+            s.start()
+
+    def stop_services(self):
+        for service in self.service_stack:
+            service.cancel()
+
     def run(self):
         log.info("Starting server thread...")
 
         self.running = True
+        self.load_config()
+        self.slack_wrapper = SlackWrapper(self.get_config_option("api_key"))
+        self.start_services()
 
         while self.running:
             try:
-                self.load_config()
-                self.slack_wrapper = SlackWrapper(self.get_config_option("api_key"))
-
                 if self.slack_wrapper.connected:
                     log.info("Connection successful...")
                     self.load_bot_data()
@@ -162,5 +180,5 @@ class BotServer(threading.Thread):
                 # and remove the superfluous exception handling if auto_reconnect works.
                 log.exception("Slack connection error. Trying manual reconnect in 5 seconds...")
                 time.sleep(5)
-
+        self.stop_services()
         log.info("Shutdown complete...")

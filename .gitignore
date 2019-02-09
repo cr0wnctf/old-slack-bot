@@ -8,3 +8,4 @@ config_solvetracker.json
 intro_msg
 venv
 .idea
+old-pos.txt
